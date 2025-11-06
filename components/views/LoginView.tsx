@@ -1,17 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 interface LoginViewProps {
     onLoginSuccess: () => void;
 }
 
 const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
-    const [token, setToken] = useState('');
-
     const handleConnect = () => {
-        // In a real app, you'd validate the token here.
-        if (token.trim()) {
-            onLoginSuccess();
-        }
+        // In a real app, authentication would happen here.
+        onLoginSuccess();
     };
 
     return (
@@ -22,18 +18,9 @@ const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
                 连接到 HawkAI 服务以开始使用智能可靠性扫描。您的身份信息将用于同步配置和优化扫描模型。
             </p>
             <div className="w-full max-w-xs">
-                <input
-                    type="password"
-                    value={token}
-                    onChange={(e) => setToken(e.target.value)}
-                    placeholder="输入您的授权 Token"
-                    className="w-full px-3 py-2 rounded-md text-sm bg-[#2b2b2b] border border-[#555555] text-gray-300 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-600 mb-4"
-                    aria-label="Authorization Token"
-                />
                 <button
                     onClick={handleConnect}
-                    disabled={!token.trim()}
-                    className="w-full px-4 py-2.5 rounded-md text-sm font-semibold bg-green-600 text-white hover:bg-green-500 transition-colors shadow-lg disabled:bg-gray-600 disabled:cursor-not-allowed"
+                    className="w-full px-4 py-2.5 rounded-md text-sm font-semibold bg-green-600 text-white hover:bg-green-500 transition-colors shadow-lg"
                 >
                     🔗 连接到 HawkAI 服务
                 </button>
