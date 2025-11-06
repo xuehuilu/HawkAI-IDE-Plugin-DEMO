@@ -1,0 +1,5 @@
+{
+  "name": "HawkAI IDE Plugin",
+  "description": "A prototype of the HawkAI IDE plugin for reliability scanning, demonstrating the complete user journey from scanning to risk assessment.",
+  "requestFramePermissions": []
+}
