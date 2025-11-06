@@ -67,7 +67,6 @@ const RiskItem: React.FC<RiskItemProps> = ({ risk, isOpen, onToggle, showToast, 
             type: 'success',
             title: '👍 反馈已提交',
             message: message,
-            autoClose: true,
         });
     };
 

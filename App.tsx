@@ -31,9 +31,6 @@ const App: React.FC = () => {
     const showToast = useCallback((toast: Omit<ToastType, 'id'>) => {
         const id = toastCounter++;
         setToasts(currentToasts => [...currentToasts, { ...toast, id }]);
-        if (toast.autoClose) {
-            setTimeout(() => hideToast(id), 3000);
-        }
     }, [toastCounter]);
 
     const handleSetScanState = useCallback((newState: ScanState) => {
@@ -55,7 +52,7 @@ const App: React.FC = () => {
                 break;
             case ScanState.Success:
                 setHasUnread(false);
-                showToast({ type: 'success', title: '✅ 扫描完成 - 未发现风险', message: '本次提交代码可靠性良好<br>扫描耗时: 2分15秒', autoClose: true });
+                showToast({ type: 'success', title: '✅ 扫描完成 - 未发现风险', message: '本次提交代码可靠性良好<br>扫描耗时: 2分15秒' });
                 break;
             case ScanState.Risks:
                 setHasUnread(true);
@@ -77,7 +74,7 @@ const App: React.FC = () => {
     }, [showToast, toasts]);
     
     const handleLoginSuccess = () => {
-        showToast({ type: 'success', title: '✅ 连接成功', message: '已成功连接到 HawkAI 服务', autoClose: true });
+        showToast({ type: 'success', title: '✅ 连接成功', message: '已成功连接到 HawkAI 服务' });
         if (hasUnread) {
             handleSetScanState(ScanState.Unread);
         } else {

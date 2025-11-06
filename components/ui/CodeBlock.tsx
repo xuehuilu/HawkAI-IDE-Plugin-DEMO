@@ -15,7 +15,6 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ code, showToast }) => {
             type: 'success',
             title: '✅ 代码已应用',
             message: '修复建议已应用到您的工作区',
-            autoClose: true,
         });
     };
 

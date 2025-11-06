@@ -49,7 +49,6 @@ export interface Toast {
     title: string;
     message: string;
     actions?: ToastAction[];
-    autoClose?: boolean;
 }
 
 export interface TimelineStep {
