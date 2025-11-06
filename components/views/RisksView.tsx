@@ -1,9 +1,9 @@
-
 import React, { useState } from 'react';
 import Section, { StatusCard } from '../ui/Section';
 import StatusBadge from '../ui/StatusBadge';
 import { RISKS_DATA } from '../../constants';
-import { Risk, RiskLevel } from '../../types';
+import { Risk, RiskLevel, Toast } from '../../types';
+import CodeBlock from '../ui/CodeBlock';
 
 const riskLevelConfig = {
     [RiskLevel.High]: {
@@ -30,8 +30,46 @@ const StatCard: React.FC<{ value: number; label: string; level: RiskLevel }> = (
     </div>
 );
 
-const RiskItem: React.FC<{ risk: Risk; isOpen: boolean; onToggle: () => void }> = ({ risk, isOpen, onToggle }) => {
+const FeedbackButton: React.FC<{ onClick: () => void, children: React.ReactNode }> = ({ onClick, children }) => (
+    <button
+        onClick={onClick}
+        className="px-2 py-1 rounded-sm text-[10px] font-semibold bg-[#555555] text-gray-400 hover:bg-[#666666] hover:text-white transition-colors"
+    >
+        {children}
+    </button>
+);
+
+interface RiskItemProps {
+    risk: Risk;
+    isOpen: boolean;
+    onToggle: () => void;
+    showToast: (toast: Omit<Toast, 'id'>) => void;
+    onDiscuss: (risk: Risk) => void;
+}
+
+const RiskItem: React.FC<RiskItemProps> = ({ risk, isOpen, onToggle, showToast, onDiscuss }) => {
     const config = riskLevelConfig[risk.level];
+
+    const handleFeedback = (feedbackType: string) => {
+        let message = '';
+        switch (feedbackType) {
+            case 'ignore-rule':
+                message = '后续扫描将减少此规则的出现频率';
+                break;
+            case 'ignore-file':
+                message = '将不再提示此文件中的该问题';
+                break;
+            case 'inaccurate':
+                message = '感谢您的反馈,我们将用此信息优化模型';
+                break;
+        }
+        showToast({
+            type: 'success',
+            title: '👍 反馈已提交',
+            message: message,
+            autoClose: true,
+        });
+    };
 
     return (
         <div className={`bg-[#43454a] border border-[#555555] border-l-4 ${config.color} rounded-md mb-3 overflow-hidden`}>
@@ -71,17 +109,26 @@ const RiskItem: React.FC<{ risk: Risk; isOpen: boolean; onToggle: () => void }> 
                             <div className="text-xs text-gray-300 bg-[#3c3f41] p-2 rounded-sm leading-relaxed">
                                 <p>{risk.recommendation.text}</p>
                                 {risk.recommendation.code && (
-                                     <div className="bg-[#2b2b2b] border border-[#555555] rounded-sm p-2 text-xs font-mono overflow-x-auto mt-2">
-                                        <span className="block whitespace-pre">{risk.recommendation.code}</span>
-                                     </div>
+                                     <CodeBlock code={risk.recommendation.code} showToast={showToast} />
                                 )}
                             </div>
                         </div>
-                    </div>
-                    <div className="flex gap-2 mt-4">
-                        <button className="px-3 py-1.5 rounded-sm text-xs font-semibold bg-green-600 text-white hover:bg-green-500 transition-colors">💡 查看修复示例</button>
-                        {risk.recommendation.code && <button className="px-3 py-1.5 rounded-sm text-xs font-semibold bg-[#555555] text-gray-300 hover:bg-[#666666] hover:text-white transition-colors">📋 复制建议代码</button>}
-                        <button className="px-3 py-1.5 rounded-sm text-xs font-semibold bg-[#555555] text-gray-300 hover:bg-[#666666] hover:text-white transition-colors">✓ 标记已修复</button>
+                        <div className="border-t border-[#555555] pt-3 mt-3 flex justify-between items-center">
+                             <div>
+                                <h5 className="text-[11px] font-semibold text-gray-500 mb-2 uppercase">对此结果不满意？</h5>
+                                <div className="flex gap-2">
+                                    <FeedbackButton onClick={() => handleFeedback('ignore-rule')}>忽略该规则</FeedbackButton>
+                                    <FeedbackButton onClick={() => handleFeedback('ignore-file')}>文件内忽略</FeedbackButton>
+                                    <FeedbackButton onClick={() => handleFeedback('inaccurate')}>结果不准确</FeedbackButton>
+                                </div>
+                             </div>
+                             <button
+                                onClick={() => onDiscuss(risk)}
+                                className="px-3 py-1.5 rounded-md text-xs font-semibold bg-blue-600 text-white hover:bg-blue-500 transition-colors flex items-center gap-1.5"
+                             >
+                                💬 与 AI 讨论
+                             </button>
+                        </div>
                     </div>
                 </div>
             )}
@@ -89,7 +136,12 @@ const RiskItem: React.FC<{ risk: Risk; isOpen: boolean; onToggle: () => void }> 
     );
 };
 
-const RisksView: React.FC = () => {
+interface RisksViewProps {
+    showToast: (toast: Omit<Toast, 'id'>) => void;
+    onStartChat: (risk: Risk) => void;
+}
+
+const RisksView: React.FC<RisksViewProps> = ({ showToast, onStartChat }) => {
     const [openRisk, setOpenRisk] = useState<string | null>(RISKS_DATA[0].title);
 
     const toggleRisk = (title: string) => {
@@ -125,6 +177,8 @@ const RisksView: React.FC = () => {
                             risk={risk}
                             isOpen={openRisk === risk.title}
                             onToggle={() => toggleRisk(risk.title)}
+                            showToast={showToast}
+                            onDiscuss={onStartChat}
                         />
                     ))}
                 </div>
@@ -132,7 +186,6 @@ const RisksView: React.FC = () => {
             
             <div className="flex gap-2 mt-5">
                 <button className="px-4 py-2 rounded-md text-xs font-semibold bg-green-600 text-white hover:bg-green-500 transition-colors">📋 导出完整报告</button>
-                <button className="px-4 py-2 rounded-md text-xs font-semibold bg-[#555555] text-gray-300 hover:bg-[#666666] hover:text-white transition-colors">💬 与 AI 讨论风险</button>
             </div>
         </div>
     );

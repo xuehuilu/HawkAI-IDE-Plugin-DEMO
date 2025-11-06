@@ -1,11 +1,11 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
-import { ActiveTab, ScanState, Toast as ToastType } from './types';
+import { ActiveTab, ScanState, Toast as ToastType, Risk } from './types';
 import Toolbar from './components/Toolbar';
 import Tabs from './components/Tabs';
 import Toast from './components/Toast';
 import DemoControls from './components/DemoControls';
 
+import LoginView from './components/views/LoginView';
 import ReadyView from './components/views/ReadyView';
 import ScanningView from './components/views/ScanningView';
 import SuccessView from './components/views/SuccessView';
@@ -14,12 +14,14 @@ import ErrorView from './components/views/ErrorView';
 import TimeoutView from './components/views/TimeoutView';
 import UnreadView from './components/views/UnreadView';
 import SettingsView from './components/views/SettingsView';
+import ChatView from './components/views/ChatView';
 
 const App: React.FC = () => {
     const [activeTab, setActiveTab] = useState<ActiveTab>(ActiveTab.Scan);
-    const [scanState, setScanState] = useState<ScanState>(ScanState.Risks);
+    const [scanState, setScanState] = useState<ScanState>(ScanState.Login);
     const [toasts, setToasts] = useState<ToastType[]>([]);
     const [hasUnread, setHasUnread] = useState(true);
+    const [selectedRisk, setSelectedRisk] = useState<Risk | null>(null);
     let toastCounter = 0;
 
     const hideToast = (id: number) => {
@@ -35,9 +37,13 @@ const App: React.FC = () => {
     }, [toastCounter]);
 
     const handleSetScanState = useCallback((newState: ScanState) => {
-        setToasts([]); // Clear existing toasts on state change
+        // Clear only non-feedback toasts on state change
+        setToasts(currentToasts => currentToasts.filter(t => t.title.includes('反馈')));
         setScanState(newState);
-        setActiveTab(ActiveTab.Scan);
+
+        if (newState !== ScanState.Login) {
+            setActiveTab(ActiveTab.Scan);
+        }
 
         switch (newState) {
             case ScanState.Start:
@@ -69,39 +75,52 @@ const App: React.FC = () => {
                  break;
         }
     }, [showToast, toasts]);
+    
+    const handleLoginSuccess = () => {
+        showToast({ type: 'success', title: '✅ 连接成功', message: '已成功连接到 HawkAI 服务', autoClose: true });
+        if (hasUnread) {
+            handleSetScanState(ScanState.Unread);
+        } else {
+            handleSetScanState(ScanState.Ready);
+        }
+    };
 
     const handleSwitchTab = (tab: ActiveTab) => {
+        if(scanState === ScanState.Login) return;
         setActiveTab(tab);
         if(tab === ActiveTab.Scan) {
            setHasUnread(false);
         }
     };
     
+    const handleStartChat = (risk: Risk) => {
+        setSelectedRisk(risk);
+        setActiveTab(ActiveTab.Chat);
+    };
+
+    const handleCloseChat = () => {
+        setSelectedRisk(null);
+        setActiveTab(ActiveTab.Scan);
+    };
+
     const renderContent = () => {
         if (activeTab === ActiveTab.Settings) {
             return <SettingsView />;
         }
-        if (activeTab === ActiveTab.History) {
-             return (
-                <div className="text-center py-20 px-5">
-                    <div className="text-6xl mb-4 opacity-60">🗂️</div>
-                    <h3 className="text-base font-semibold text-gray-300 mb-2">无历史记录</h3>
-                    <p className="text-xs text-gray-500 leading-relaxed">
-                        此处的扫描历史记录将很快推出。
-                    </p>
-                </div>
-            );
+        if (activeTab === ActiveTab.Chat && selectedRisk) {
+            return <ChatView risk={selectedRisk} showToast={showToast} />;
         }
 
         switch (scanState) {
+            case ScanState.Login: return <LoginView onLoginSuccess={handleLoginSuccess} />;
             case ScanState.Ready: return <ReadyView />;
             case ScanState.Scanning: return <ScanningView />;
             case ScanState.Success: return <SuccessView />;
-            case ScanState.Risks: return <RisksView />;
+            case ScanState.Risks: return <RisksView showToast={showToast} onStartChat={handleStartChat} />;
             case ScanState.Error: return <ErrorView onRetry={() => handleSetScanState(ScanState.Scanning)} />;
             case ScanState.Timeout: return <TimeoutView onCancel={() => handleSetScanState(ScanState.Ready)} />;
             case ScanState.Unread: return <UnreadView onViewReport={() => handleSetScanState(ScanState.Risks)} />;
-            default: return <RisksView />;
+            default: return <RisksView showToast={showToast} onStartChat={handleStartChat} />;
         }
     };
 
@@ -109,7 +128,13 @@ const App: React.FC = () => {
         <div className="flex flex-col items-center">
             <div className="w-[450px] min-h-[600px] bg-[#3c3f41] border border-[#555555] rounded-md flex flex-column shadow-lg mx-auto flex-col">
                 <Toolbar onSettingsClick={() => handleSwitchTab(ActiveTab.Settings)} />
-                <Tabs activeTab={activeTab} setActiveTab={handleSwitchTab} hasUnread={hasUnread} />
+                <Tabs 
+                    activeTab={activeTab} 
+                    setActiveTab={handleSwitchTab} 
+                    hasUnread={hasUnread}
+                    showChatTab={!!selectedRisk}
+                    onCloseChat={handleCloseChat}
+                />
                 <div className="flex-1 overflow-y-auto p-4 bg-[#3c3f41]">
                     {renderContent()}
                 </div>

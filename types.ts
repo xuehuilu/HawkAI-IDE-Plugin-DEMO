@@ -1,11 +1,11 @@
-
 export enum ActiveTab {
     Scan = 'scan',
-    History = 'history',
     Settings = 'settings',
+    Chat = 'chat',
 }
 
 export enum ScanState {
+    Login = 'login',
     Ready = 'ready',
     Start = 'start',
     Scanning = 'scanning-queue',

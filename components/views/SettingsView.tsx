@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 const SettingsSection: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
@@ -14,17 +13,17 @@ const SettingItem: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     </div>
 );
 
-const Checkbox: React.FC<{ id: string; label: string; defaultChecked?: boolean }> = ({ id, label, defaultChecked }) => (
+const Checkbox: React.FC<{ id: string; label: string; defaultChecked?: boolean; disabled?: boolean }> = ({ id, label, defaultChecked, disabled }) => (
     <>
-        <input type="checkbox" id={id} defaultChecked={defaultChecked} className="w-4 h-4 mr-2 cursor-pointer accent-green-600 bg-gray-700 border-gray-600" />
-        <label htmlFor={id} className="flex-1 text-xs text-gray-300 cursor-pointer">{label}</label>
+        <input type="checkbox" id={id} defaultChecked={defaultChecked} disabled={disabled} className="w-4 h-4 mr-2 cursor-pointer accent-green-600 bg-gray-700 border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed" />
+        <label htmlFor={id} className={`flex-1 text-xs text-gray-300 ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>{label}</label>
     </>
 );
 
-const Radio: React.FC<{ id: string; name: string; label: string; defaultChecked?: boolean }> = ({ id, name, label, defaultChecked }) => (
+const Radio: React.FC<{ id: string; name: string; label: string; defaultChecked?: boolean; disabled?: boolean }> = ({ id, name, label, defaultChecked, disabled }) => (
      <div className="flex items-center">
-        <input type="radio" name={name} id={id} defaultChecked={defaultChecked} className="w-3.5 h-3.5 mr-2 cursor-pointer accent-green-600 bg-gray-700 border-gray-600" />
-        <label htmlFor={id} className="text-xs text-gray-300 cursor-pointer">{label}</label>
+        <input type="radio" name={name} id={id} defaultChecked={defaultChecked} disabled={disabled} className="w-3.5 h-3.5 mr-2 cursor-pointer accent-green-600 bg-gray-700 border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed" />
+        <label htmlFor={id} className={`text-xs text-gray-300 ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>{label}</label>
     </div>
 );
 
@@ -41,10 +40,10 @@ const SettingsView: React.FC = () => {
 
             <SettingsSection title="🔍 扫描策略">
                 <SettingItem><Checkbox id="scan-changed-only" label="仅扫描变更的文件" defaultChecked /></SettingItem>
-                <SettingItem><Checkbox id="scan-full-project" label="扫描整个项目" /></SettingItem>
+                <SettingItem><Checkbox id="scan-full-project" label="扫描整个项目" disabled /></SettingItem>
                 <div className="flex flex-col gap-2 mt-3">
                    <Radio id="auto-trigger" name="trigger" label="自动扫描（提交时触发）" defaultChecked />
-                   <Radio id="manual-trigger" name="trigger" label="手动触发" />
+                   <Radio id="manual-trigger" name="trigger" label="手动触发" disabled />
                 </div>
             </SettingsSection>
             

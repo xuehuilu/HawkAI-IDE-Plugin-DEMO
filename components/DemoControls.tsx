@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ScanState, ActiveTab } from '../types';
 
@@ -32,6 +31,7 @@ const DemoControls: React.FC<DemoControlsProps> = ({ setScanState, currentState,
             
             <div className="mb-4">
                 <h4 className="text-[11px] text-gray-500 mb-2 uppercase font-semibold">📋 核心流程</h4>
+                <DemoButton onClick={() => setScanState(ScanState.Login)} isActive={currentState === ScanState.Login}>0. 登录/连接</DemoButton>
                 <DemoButton onClick={() => setScanState(ScanState.Ready)} isActive={currentState === ScanState.Ready}>1. 准备阶段（等待提交）</DemoButton>
                 <DemoButton onClick={() => setScanState(ScanState.Start)} isActive={false}>2. 触发扫描（Toast提示）</DemoButton>
                 <DemoButton onClick={() => setScanState(ScanState.Scanning)} isActive={currentState === ScanState.Scanning}>3. 扫描进行中（队列）</DemoButton>
