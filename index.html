@@ -2,6 +2,12 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta http-equiv="Content-Security-Policy" 
+        content="default-src 'self'; 
+                 script-src 'self' 'unsafe-eval' https://aistudiocdn.com https://cdn.twind.style; 
+                 style-src 'self' 'unsafe-inline' https://cdn.twind.style;
+                 connect-src 'self' ws: wss:;
+                 img-src 'self' data: https:;">
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HawkAI IDE Plugin</title>
